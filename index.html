@@ -134,6 +134,7 @@ function renderAttendance(){
 }
 function otGroups(){return [...new Set(employees.filter(e=>e.is_active).map(e=>e.department||e.work_group||'Khác'))].sort((a,b)=>a.localeCompare(b,'vi'))}
 function otFilteredRecords(){const from=$('otFrom')?.value||'',to=$('otTo')?.value||'';return ots.filter(x=>(!from||x.ot_date>=from)&&(!to||x.ot_date<=to))}
+function fmtOtNumber(value){const n=Number(value)||0;if(n===0)return '';return String(Number(n.toFixed(2)));}
 function renderOtStandard(){
  const date=$('otStandardDate')?.value||$('otDate')?.value||localTodayISO(),groups=otGroups(),levels=['1','1.4','1.5','2','2.5','3'];
  $('otEffectiveDate').textContent='Ngày áp dụng: '+date;
@@ -143,13 +144,13 @@ function renderOtStandard(){
  groups.forEach(g=>{
   const records=otFilteredRecords().filter(x=>(x.employees?.department||x.employees?.work_group||'Khác')===g);
   let standard=0,actual=0;
-  const cells=levels.map(v=>{const n=records.filter(x=>String(Number(x.hours))===String(Number(v))).length;actual+=n*Number(v);return '<td>'+n+'</td>'});
-  const inputs=levels.map(v=>{const n=Number(stored[g]?.[v]||0);standard+=n*Number(v);return '<td><input class="otStdInput" data-group="'+esc(g)+'" data-level="'+v+'" type="number" min="0" value="'+n+'" style="width:62px;padding:6px;text-align:center"></td>'}).join('');
+  const cells=levels.map(v=>{const n=records.filter(x=>String(Number(x.hours))===String(Number(v))).length;actual+=n*Number(v);return '<td>'+fmtOtNumber(n)+'</td>'});
+  const inputs=levels.map(v=>{const n=Number(stored[g]?.[v]||0);standard+=n*Number(v);return '<td><input class="otStdInput" data-group="'+esc(g)+'" data-level="'+v+'" type="number" min="0" value="'+(n===0?'':fmtOtNumber(n))+'" style="width:62px;padding:6px;text-align:center"></td>'}).join('');
   const gap=actual-standard;totalStandard+=standard;totalActual+=actual;
-  html+='<tr><td><b>'+esc(g)+'</b></td>'+inputs+'<td><b>'+standard.toFixed(2).replace(/\.00$/,'')+'</b></td>'+cells.join('')+'<td><b>'+actual.toFixed(2).replace(/\.00$/,'')+'</b></td><td><b>'+gap.toFixed(2).replace(/\.00$/,'')+'</b></td></tr>';
+  html+='<tr><td><b>'+esc(g)+'</b></td>'+inputs+'<td><b>'+fmtOtNumber(standard)+'</b></td>'+cells.join('')+'<td><b>'+fmtOtNumber(actual)+'</b></td><td><b>'+fmtOtNumber(gap)+'</b></td></tr>';
  });
  const totalGap=totalActual-totalStandard;
- $('otStandardRows').innerHTML=html+'<tr style="background:#f1f5f9"><td><b>Total</b></td><td colspan="6"></td><td><b>'+totalStandard.toFixed(2).replace(/\.00$/,'')+'</b></td><td colspan="6"></td><td><b>'+totalActual.toFixed(2).replace(/\.00$/,'')+'</b></td><td><b>'+totalGap.toFixed(2).replace(/\.00$/,'')+'</b></td></tr>';
+ $('otStandardRows').innerHTML=html+'<tr style="background:#f1f5f9"><td><b>Total</b></td><td colspan="6"></td><td><b>'+fmtOtNumber(totalStandard)+'</b></td><td colspan="6"></td><td><b>'+fmtOtNumber(totalActual)+'</b></td><td><b>'+fmtOtNumber(totalGap)+'</b></td></tr>';
 }
 function renderOtRoster(){
  const date=$('otDate')?.value||$('attDate')?.value,dayTeam=$('attDayTeam')?.value||'Ca A';if(!$('otRosterRows'))return;
@@ -166,7 +167,7 @@ function renderOtRoster(){
 }
 function renderOt(){
  const rows=otFilteredRecords();
- $('otRows').innerHTML=rows.map(x=>'<tr><td>'+x.ot_date+'</td><td>'+esc(x.employees?.employee_code)+'</td><td>'+esc(x.employees?.full_name)+'</td><td>'+shiftText(x.shift)+'</td><td><select class="savedOtHours" data-id="'+x.id+'">'+['1','1.4','1.5','2','2.5','3'].map(v=>'<option '+(Number(x.hours)===Number(v)?'selected':'')+'>'+v+'</option>').join('')+'</select></td><td><select class="savedOtNote" data-id="'+x.id+'"><option value="">-- Chọn ghi chú --</option><option '+(x.notes==='Sản xuất'?'selected':'')+'>Sản xuất</option><option '+(x.notes==='Kế hoạch sản xuất'?'selected':'')+'>Kế hoạch sản xuất</option><option '+(x.notes==='Khác'?'selected':'')+'>Khác</option></select></td><td><span class="pill">Đã lưu</span></td><td><button class="danger" data-delete-ot="'+x.id+'">Xóa OT</button></td></tr>').join('');
+ $('otRows').innerHTML=rows.map(x=>'<tr><td>'+x.ot_date+'</td><td>'+esc(x.employees?.employee_code)+'</td><td>'+esc(x.employees?.full_name)+'</td><td>'+esc(x.employees?.work_group||'Hành Chính')+'</td><td><select class="savedOtHours" data-id="'+x.id+'">'+['1','1.4','1.5','2','2.5','3'].map(v=>'<option '+(Number(x.hours)===Number(v)?'selected':'')+'>'+v+'</option>').join('')+'</select></td><td><select class="savedOtNote" data-id="'+x.id+'"><option value="">-- Chọn ghi chú --</option><option '+(x.notes==='Sản xuất'?'selected':'')+'>Sản xuất</option><option '+(x.notes==='Kế hoạch sản xuất'?'selected':'')+'>Kế hoạch sản xuất</option><option '+(x.notes==='Khác'?'selected':'')+'>Khác</option></select></td><td><span class="pill">Đã lưu</span></td><td><button class="danger" data-delete-ot="'+x.id+'">Xóa OT</button></td></tr>').join('');
  renderOtRoster();renderOtStandard();
 }
 function renderLeave(){$('leaveRows').innerHTML=leaves.map(x=>'<tr><td>'+esc(x.employees?.employee_code+' - '+x.employees?.full_name)+'</td><td>'+x.start_date+' → '+x.end_date+'</td><td>'+esc(x.leave_type)+'</td><td>'+esc(x.reason||'')+'</td><td>'+esc(x.status)+'</td><td>'+(x.status==='Chờ duyệt'?'<button data-approve="'+x.id+'">Duyệt</button> <button class="danger" data-reject="'+x.id+'">Từ chối</button>':'')+'</td></tr>').join('')}
@@ -214,8 +215,8 @@ $('otRows').onclick=async e=>{const id=e.target.dataset.deleteOt;if(!id)return;i
 $('saveOtStandard').onclick=()=>{const date=$('otStandardDate').value;if(!date){alert('Vui lòng chọn ngày áp dụng');return}const data={};document.querySelectorAll('.otStdInput').forEach(el=>{data[el.dataset.group]??={};data[el.dataset.group][el.dataset.level]=Number(el.value)||0});localStorage.setItem('mm_ilsungtech_ot_standard_'+date,JSON.stringify(data));alert('Đã lưu tiêu chuẩn OT cho ngày '+date);renderOtStandard()};
 $('otStandardDate').onchange=renderOtStandard;
 $('otFrom').onchange=renderOt;$('otTo').onchange=renderOt;
-$('otExportAll').onclick=()=>{const data=otFilteredRecords().map(x=>({'Ngày':x.ot_date,'Mã NV':x.employees?.employee_code,'Họ tên':x.employees?.full_name,'Nhóm':x.employees?.department,'Ca':shiftText(x.shift),'Giờ OT':x.hours,'Ghi chú':x.notes||''}));if(!data.length){alert('Không có dữ liệu OT trong khoảng ngày đã chọn');return}saveExcel(data,'Du lieu OT','MM_ILSUNGTECH_OT.xlsx')};
-$('otExportRoster').onclick=()=>{const data=ots.filter(x=>x.ot_date===($('otDate').value||'')).map(x=>({'Ngày':x.ot_date,'Mã NV':x.employees?.employee_code,'Họ tên':x.employees?.full_name,'Nhóm':x.employees?.department,'Ca':shiftText(x.shift),'Giờ OT':x.hours,'Ghi chú':x.notes||''}));if(!data.length){alert('Chưa có danh sách OT đã lưu trong ngày này');return}saveExcel(data,'Danh sach OT','MM_ILSUNGTECH_Danh_Sach_OT.xlsx')};
+$('otExportAll').onclick=()=>{const data=otFilteredRecords().map(x=>({'Ngày':x.ot_date,'Mã NV':x.employees?.employee_code,'Họ tên':x.employees?.full_name,'Nhóm':x.employees?.department,'Ca':(x.employees?.work_group||'Hành Chính'),'Giờ OT':x.hours,'Ghi chú':x.notes||''}));if(!data.length){alert('Không có dữ liệu OT trong khoảng ngày đã chọn');return}saveExcel(data,'Du lieu OT','MM_ILSUNGTECH_OT.xlsx')};
+$('otExportRoster').onclick=()=>{const data=ots.filter(x=>x.ot_date===($('otDate').value||'')).map(x=>({'Ngày':x.ot_date,'Mã NV':x.employees?.employee_code,'Họ tên':x.employees?.full_name,'Nhóm':x.employees?.department,'Ca':(x.employees?.work_group||'Hành Chính'),'Giờ OT':x.hours,'Ghi chú':x.notes||''}));if(!data.length){alert('Chưa có danh sách OT đã lưu trong ngày này');return}saveExcel(data,'Danh sach OT','MM_ILSUNGTECH_Danh_Sach_OT.xlsx')};
 $('otDownloadReport').onclick=()=>window.print();
 $('leaveForm').onsubmit=async e=>{e.preventDefault();if($('leaveFrom').value>$('leaveTo').value){alert('Từ ngày phải trước hoặc bằng đến ngày');return}const r=await db.from('leave_requests').insert({employee_id:$('leaveEmployee').value,start_date:$('leaveFrom').value,end_date:$('leaveTo').value,leave_type:$('leaveType').value,reason:$('leaveReason').value,status:'Chờ duyệt'});if(r.error)alert(r.error.message);else{e.target.reset();await loadAll()}};
 $('leaveRows').onclick=async e=>{const id=e.target.dataset.approve||e.target.dataset.reject;if(!id)return;const status=e.target.dataset.approve?'Đã duyệt':'Từ chối';const r=await db.from('leave_requests').update({status}).eq('id',id);if(r.error)alert(r.error.message);else loadAll()};
