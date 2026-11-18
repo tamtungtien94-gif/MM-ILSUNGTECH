@@ -44,8 +44,8 @@
 
 </main></div>
 <script>
-const SUPABASE_URL=https://bkwgwldkxmkgjveyblcb.supabase.co;
-const SUPABASE_ANON_KEY=sb_publishable_oL5rwolvC1EscY_DgixgHQ_WS6cT6QB;
+const SUPABASE_URL='https://bkwgwldkxmkgjveyblcb.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_oL5rwolvC1EscY_DgixgHQ_WS6cT6QB';
 const configured=!SUPABASE_URL.startsWith('PASTE_')&&!SUPABASE_ANON_KEY.startsWith('PASTE_');
 const db=configured?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
 const $=id=>document.getElementById(id);let employees=[],attendance=[],ots=[],leaves=[],salaries=[],mbos=[];
