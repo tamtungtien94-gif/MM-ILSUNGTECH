@@ -12,7 +12,12 @@
 /* OT standard report: distribute all columns evenly and keep numeric columns aligned */
 .ot-standard-wrap{width:100%;overflow-x:auto}
 #otStandardTable{width:100%;min-width:1120px;table-layout:fixed;border-collapse:collapse}
-#otStandardTable th,#otStandardTable td{padding:8px 4px;text-align:center;vertical-align:middle;white-space:nowrap}
+#otStandardTable th,#otStandardTable td{padding:8px 4px;text-align:center;vertical-align:middle;white-space:nowrap;height:44px}
+#otStandardTable .ot-group-head{background:#f6f8fb!important;text-align:left!important;padding-left:10px!important}
+#otStandardTable .ot-standard-head{background:#e4f0dc!important}
+#otStandardTable .ot-actual-head{background:#f8d2b8!important}
+#otStandardTable .ot-gap-head{background:#f6f8fb!important}
+#otStandardTable .ot-total-row{background:#f1f5f9}
 #otStandardTable th:first-child,#otStandardTable td:first-child{text-align:left;padding-left:10px}
 #otStandardTable .otStdInput{display:block;width:calc(100% - 8px)!important;max-width:72px;min-width:0;margin:0 auto;padding:6px 3px;text-align:center}
 #otStandardTable .ot-negative{color:#dc2626!important;font-weight:700}
@@ -73,7 +78,7 @@
 <strong id="otEffectiveDate">Ngày áp dụng:</strong>
 <div style="display:flex;align-items:center;gap:8px"><label style="margin:0">Ngày OT</label><input type="date" id="otStandardDate" style="width:150px"><button type="button" class="secondary" id="saveOtStandard">Lưu tiêu chuẩn ngày</button></div>
 </div>
-<div class="table-wrap ot-standard-wrap"><table id="otStandardTable"><colgroup><col style="width:12%"><col style="width:5.5%"><col style="width:5.5%"><col style="width:5.5%"><col style="width:5.5%"><col style="width:5.5%"><col style="width:5.5%"><col style="width:7%"><col style="width:5.5%"><col style="width:5.5%"><col style="width:5.5%"><col style="width:5.5%"><col style="width:5.5%"><col style="width:5.5%"><col style="width:7%"><col style="width:8%></colgroup><thead><tr><th rowspan="2">Nhóm</th><th colspan="6" style="background:#e4f0dc;text-align:center">Tiêu Chuẩn</th><th rowspan="2" style="background:#e4f0dc">Tổng giờ OT<br>tiêu chuẩn</th><th colspan="7" style="background:#f8d2b8;text-align:center">Thực Tế</th><th rowspan="2">GAP</th></tr><tr><th style="background:#e4f0dc">1</th><th style="background:#e4f0dc">1.4</th><th style="background:#e4f0dc">1.5</th><th style="background:#e4f0dc">2</th><th style="background:#e4f0dc">2.5</th><th style="background:#e4f0dc">3</th><th style="background:#f8d2b8">1</th><th style="background:#f8d2b8">1.4</th><th style="background:#f8d2b8">1.5</th><th style="background:#f8d2b8">2</th><th style="background:#f8d2b8">2.5</th><th style="background:#f8d2b8">3</th><th style="background:#f8d2b8">Tổng hợp OT thực tế</th></tr></thead><tbody id="otStandardRows"></tbody></table></div>
+<div class="table-wrap ot-standard-wrap"><table id="otStandardTable"><colgroup><col style="width:12%"><col span="6" style="width:5.5%"><col style="width:7%"><col span="6" style="width:5.5%"><col style="width:7%"><col style="width:8%"></colgroup><thead><tr><th rowspan="2" class="ot-group-head">Nhóm</th><th colspan="6" class="ot-standard-head">Tiêu Chuẩn</th><th rowspan="2" class="ot-standard-head">Tổng giờ OT<br>tiêu chuẩn</th><th colspan="7" class="ot-actual-head">Thực Tế</th><th rowspan="2" class="ot-gap-head">GAP</th></tr><tr><th class="ot-standard-head">1</th><th class="ot-standard-head">1.4</th><th class="ot-standard-head">1.5</th><th class="ot-standard-head">2</th><th class="ot-standard-head">2.5</th><th class="ot-standard-head">3</th><th class="ot-actual-head">1</th><th class="ot-actual-head">1.4</th><th class="ot-actual-head">1.5</th><th class="ot-actual-head">2</th><th class="ot-actual-head">2.5</th><th class="ot-actual-head">3</th><th class="ot-actual-head">Tổng hợp OT thực tế</th></tr></thead><tbody id="otStandardRows"></tbody></table></div>
 <p class="muted">Hai phần Tiêu Chuẩn và Thực Tế được chia đối xứng. Tổng hợp OT thực tế = tổng giờ OT đã lưu; GAP = Tổng hợp OT thực tế − Tổng giờ OT tiêu chuẩn.</p>
 </div>
 <div class="card">
@@ -151,7 +156,7 @@ function renderOtStandard(){
   html+='<tr><td><b>'+esc(g)+'</b></td>'+inputs+'<td><b>'+fmtOtNumber(standard)+'</b></td>'+cells.join('')+'<td><b>'+fmtOtNumber(actual)+'</b></td><td><b>'+fmtOtNumber(gap)+'</b></td></tr>';
  });
  const totalGap=totalActual-totalStandard;
- $('otStandardRows').innerHTML=html+'<tr style="background:#f1f5f9"><td><b>Total</b></td><td colspan="6"></td><td><b>'+fmtOtNumber(totalStandard)+'</b></td><td colspan="6"></td><td><b>'+fmtOtNumber(totalActual)+'</b></td><td><b>'+fmtOtNumber(totalGap)+'</b></td></tr>';
+ $('otStandardRows').innerHTML=html+'<tr class="ot-total-row"><td><b>Total</b></td>'+Array(6).fill('<td></td>').join('')+'<td><b>'+fmtOtNumber(totalStandard)+'</b></td>'+Array(6).fill('<td></td>').join('')+'<td><b>'+fmtOtNumber(totalActual)+'</b></td><td class="'+(totalGap<0?'ot-negative':'')+'"><b>'+fmtOtNumber(totalGap)+'</b></td></tr>';
 }
 function renderOtRoster(){
  const date=$('otDate')?.value||$('attDate')?.value,dayTeam=$('attDayTeam')?.value||'Ca A';if(!$('otRosterRows'))return;
